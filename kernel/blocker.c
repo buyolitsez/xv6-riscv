@@ -15,7 +15,7 @@
 struct {
   struct spinlock lock;
   struct sleeplock locks[NLOCKS];
-  int deleted[NLOCKS];
+  int locked[NLOCKS];
 } ltable;
 
 void blockerinit() {
@@ -31,9 +31,10 @@ int blget() {
 
   acquire(&ltable.lock);
   for (int i = 0; i < NLOCKS; ++i) {
-	if (ltable.deleted[i] || ltable.locks[i].locked)
+	if (ltable.locked[i])
 	  continue;
 	result = i;
+	ltable.locked[i] = 1;
 	break;
   }
 
@@ -42,7 +43,7 @@ int blget() {
 }
 
 int isOkId(int id) {
-  return id >= 0 && id < NLOCKS && !ltable.deleted[id];
+  return id >= 0 && id < NLOCKS && ltable.locked[id];
 }
 
 int bllock(int id) {
@@ -62,6 +63,6 @@ int blrelease(int id) {
 int bldelete(int id) {
   if (!isOkId(id))
 	return -1;
-  ltable.deleted[id] = 1;
+  ltable.locked[id] = 0;
   return 0;
 }

@@ -21,6 +21,7 @@ void readAndWrite(int readFrom, int writeTo)
 
 int main(int argc, char* argv[])
 {
+  exitOnError((argc < 2 ? -1 : 0), "Too few arguments, need at least one");
   int pChildRead[2];
   int pParentRead[2];
   exitOnError(pipe(pChildRead), "Cannot create pipe!");
@@ -37,14 +38,15 @@ int main(int argc, char* argv[])
 	exitOnError(blocker(BACQUIRE, lock), "Cannot lock sleeplock!");
 	readAndWrite(pChildRead[0], pParentRead[1]);
 	exitOnError(blocker(BRELEASE, lock), "Cannot release sleeplock!");
+	exitOnError(blocker(BDELETE, lock), "Cannot delete sleeplock!");
 
   } else {
-	exitOnError((argc < 2 ? -1 : 0), "Too few arguments, need at least one");
 	close(pParentRead[1]); // аналогично тому что в ребенке
 	close(pChildRead[0]);
 
 	int lock = blocker(BGET, -1);
 	exitOnError(lock, "Cannot create new sleep lock!");
+	exitOnError(blocker(BACQUIRE, lock), "Cannot lock sleeplock!");
 
 	{
 	  write(pChildRead[1], &lock, sizeof(lock));
@@ -54,6 +56,7 @@ int main(int argc, char* argv[])
 		write(pChildRead[1], argv[1] + i, 1);
 	  close(pChildRead[1]);
 	}
+	exitOnError(blocker(BRELEASE, lock), "cannot release sleeplock!");
 
 	char a[1];
 	int hasLock = 0;
@@ -64,7 +67,6 @@ int main(int argc, char* argv[])
 	  }
 	  printf("%d: received %c\n", getpid(), a[0]);
 	}
-	exitOnError(blocker(BRELEASE, lock), "cannot release sleeplock!");
 	close(pParentRead[0]);
   }
   return 0;
