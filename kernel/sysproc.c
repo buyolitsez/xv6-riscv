@@ -89,3 +89,29 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64 sys_pgaccess(void) {
+  uint64 addr;
+  int cnt;  
+  uint64 bitmask;  
+
+  argaddr(0, &addr);
+  argint(1, &cnt);
+  argaddr(2, &bitmask);
+
+  if (cnt > 64) 
+	panic("pgaccess, cnt is too large");
+
+  pagetable_t pt = myproc()->pagetable;
+  pte_t *pte;
+
+  uint64 result = 0;
+  for (int i = 0; i < cnt; ++i) {
+	pte = walk(pt, addr + PGSIZE * i, 0);
+	if ((*pte & PTE_V) && (*pte & PTE_A)) {
+	  result |= 1L << i;
+	  *pte ^= PTE_A;
+	}
+  }
+  return copyout(pt, bitmask, (char *) &result, sizeof(result));
+}

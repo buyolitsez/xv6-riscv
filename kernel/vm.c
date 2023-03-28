@@ -452,8 +452,7 @@ void vmprintrec(pagetable_t pagetable, int depth) {
   }
 }
 
-int vmprint(pagetable_t pagetable) {
+void vmprint(pagetable_t pagetable) {
   printf("page table %p\n", pagetable);
   vmprintrec(pagetable, 1);
-  return 0;
 }
