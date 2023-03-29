@@ -3,6 +3,7 @@
 #include "memlayout.h"
 #include "riscv.h"
 #include "defs.h"
+#include "dmesg.h"
 
 volatile static int started = 0;
 
@@ -11,12 +12,15 @@ void
 main()
 {
   if(cpuid() == 0){
+	pr_init();
     consoleinit();
     printfinit();
     printf("\n");
     printf("xv6 kernel is booting\n");
     printf("\n");
+	pr_msg("xv6 kernel is booting");
     kinit();         // physical page allocator
+	pr_msg("kinit finished");
     kvminit();       // create kernel page table
     kvminithart();   // turn on paging
     procinit();      // process table
@@ -31,6 +35,7 @@ main()
     userinit();      // first user process
     __sync_synchronize();
     started = 1;
+	pr_msg("xv6 has started");
   } else {
     while(started == 0)
       ;
