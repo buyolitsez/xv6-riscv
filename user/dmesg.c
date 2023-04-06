@@ -5,6 +5,7 @@
 int main(int argc, char* argv[])
 {
   dmesg();
+  print_user_dmesg();
   return 0;
 }
 

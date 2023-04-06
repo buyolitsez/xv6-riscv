@@ -18,9 +18,7 @@ main()
     printf("\n");
     printf("xv6 kernel is booting\n");
     printf("\n");
-	pr_msg("xv6 kernel is booting");
     kinit();         // physical page allocator
-	pr_msg("kinit finished");
     kvminit();       // create kernel page table
     kvminithart();   // turn on paging
     procinit();      // process table
@@ -35,7 +33,7 @@ main()
     userinit();      // first user process
     __sync_synchronize();
     started = 1;
-	pr_msg("xv6 has started");
+	  pr_msg("%s%d has started", "xv", 6);
   } else {
     while(started == 0)
       ;
