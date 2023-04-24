@@ -1,3 +1,5 @@
+#include <stdarg.h>
+
 struct buf;
 struct context;
 struct file;
@@ -78,8 +80,12 @@ int             pipewrite(struct pipe*, uint64, int);
 
 // printf.c
 void            printf(char*, ...);
-void            panic(char*) __attribute__((noreturn));
 void            printfinit(void);
+
+// printing.c
+enum            printing_to {TO_DMESG, TO_CONSOLE};
+void            printing(const char*, enum printing_to, va_list);
+void            panic(char*) __attribute__((noreturn));
 
 // proc.c
 int             cpuid(void);
@@ -147,6 +153,10 @@ void            trapinit(void);
 void            trapinithart(void);
 extern struct spinlock tickslock;
 void            usertrapret(void);
+
+// dmesg.c
+void            pr_init();
+void            bset(char x);
 
 // uart.c
 void            uartinit(void);

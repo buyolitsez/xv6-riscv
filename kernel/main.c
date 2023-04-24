@@ -3,6 +3,7 @@
 #include "memlayout.h"
 #include "riscv.h"
 #include "defs.h"
+#include "dmesg.h"
 
 volatile static int started = 0;
 
@@ -11,6 +12,7 @@ void
 main()
 {
   if(cpuid() == 0){
+	pr_init();
     consoleinit();
     printfinit();
     printf("\n");
@@ -31,6 +33,7 @@ main()
     userinit();      // first user process
     __sync_synchronize();
     started = 1;
+	  pr_msg("%s%d has started", "xv", 6);
   } else {
     while(started == 0)
       ;
