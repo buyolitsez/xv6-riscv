@@ -36,5 +36,4 @@ entry("getpid");
 entry("sbrk");
 entry("sleep");
 entry("uptime");
-entry("dmesg");
-entry("print_user_dmesg");
+entry("copy_user_dmesg");

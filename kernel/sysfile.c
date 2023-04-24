@@ -506,16 +506,10 @@ sys_pipe(void)
 }
 
 uint64
-sys_dmesg(void)
+sys_copy_user_dmesg(void)
 {
-  pr_copy();
-  return 0;
-}
-
-uint64
-sys_print_user_dmesg(void)
-{
-  pr_user_dmesg();
-  pr_msg("printed user dmesg!");
+  uint64 p;
+  argaddr(0, &p);
+  pr_copy(p);
   return 0;
 }

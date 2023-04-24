@@ -5,30 +5,28 @@
 #include "defs.h"
 #include "param.h"
 #include "spinlock.h"
+#include "proc.h"
 
 #include "dmesg.h"
 
-#define SIZE (DMESG_BFS * PGSIZE)
 #define N_SIZE 10
+
+#define SIZE SIZE_DMESG_BUFFER
 
 struct dmesg_s {
     char buf[SIZE];
     struct spinlock lock;
     int p; // buffer pointer
     int current_len;
-} kerm, usrm;
-
-static void dmesg_init(struct dmesg_s *m, char *lockname) {
-  initlock(&m->lock, lockname);
-  for (int i = 0; i < SIZE; ++i)
-    m->buf[i] = '\0';
-  m->p = 0;
-  m->current_len = 0;
-}
+} kerm;
 
 void pr_init() { // initialize
-  dmesg_init(&kerm, "dmesg");
-  dmesg_init(&usrm, "user-dmesg");
+  initlock(&kerm.lock, "dmesg");
+  for (int i = 0; i < SIZE; ++i)
+    kerm.buf[i] = '\0';
+  kerm.p = 0;
+  kerm.current_len = 0;
+
 }
 
 static char get_digit(uint x, int pos) { // get digit from number
@@ -84,9 +82,16 @@ void pr_msg(const char *fmt, ...) {
   release(&kerm.lock);
 }
 
+char user_buf[SIZE];
+int user_buf_position = 0;
+
+static void put_char(char x) {
+  user_buf[user_buf_position++] = x;
+}
+
 static int put_word(int pos) { // print single message
   while (1) {
-    consputc(kerm.buf[pos]);
+    put_char(kerm.buf[pos]);
     if (kerm.buf[pos] == '\n')
       break;
     pos = (pos + 1) % SIZE;
@@ -95,7 +100,6 @@ static int put_word(int pos) { // print single message
 }
 
 static void print_dmesg(struct dmesg_s *m) {
-  acquire(&m->lock);
   int start = m->p;
   int i;
   if (m->buf[start] == '\0')
@@ -108,23 +112,17 @@ static void print_dmesg(struct dmesg_s *m) {
     else
       i = (i + 1) % SIZE;
   }
-  release(&m->lock);
 }
 
-void pr_dmesg() {
-  print_dmesg(&kerm);
-}
-
-void pr_user_dmesg() {
-  print_dmesg(&usrm);
-}
-
-void pr_copy() {
+void pr_copy(uint64 p) {
+  pr_msg("dmesg: pr_copy on address %p called!", p);
   acquire(&kerm.lock);
-  acquire(&usrm.lock);
-  usrm.p = kerm.p;
   for (int i = 0; i < SIZE; ++i)
-    usrm.buf[i] = kerm.buf[i];
-  release(&usrm.lock);
+    user_buf[i] = 0;
+  user_buf_position = 0;
+  print_dmesg(&kerm);
+  int code = copyout(myproc()->pagetable, p, (char *)&user_buf, sizeof(user_buf));
   release(&kerm.lock);
+  if (code != 0)
+    panic("dmesg: cannot copy to user space");
 }
