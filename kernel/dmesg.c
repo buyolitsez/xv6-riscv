@@ -126,3 +126,12 @@ void pr_copy(uint64 p) {
   if (code != 0)
     panic("dmesg: cannot copy to user space");
 }
+
+uint ticks_to_log = 0;
+
+void addTicksToLog(uint ticks_more) {
+  uint to = ticks + ticks_more;
+  if (to > ticks_to_log)
+    ticks_to_log = to;
+}
+

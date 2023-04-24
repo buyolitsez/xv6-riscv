@@ -33,7 +33,7 @@ main()
     userinit();      // first user process
     __sync_synchronize();
     started = 1;
-	  pr_msg("%s%d has started", "xv", 6);
+	  DMESG_LOG("%s%d has started", "xv", 6);
   } else {
     while(started == 0)
       ;

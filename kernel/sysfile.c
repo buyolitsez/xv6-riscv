@@ -513,3 +513,10 @@ sys_copy_user_dmesg(void)
   pr_copy(p);
   return 0;
 }
+
+uint64
+sys_start_log_dmesg(void)
+{
+	addTicksToLog(10);
+	return 0;
+}
