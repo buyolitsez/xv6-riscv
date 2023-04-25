@@ -4,12 +4,15 @@ void pr_msg(const char *fmt, ...);
 
 void pr_copy(uint64 p);
 
-void addTicksToLog(uint ticks_more);
+void check_dmesg_logging(uint flag);
 
-extern uint ticks_to_log;
+extern uint dmesg_log_interrupt;
+extern uint dmesg_log_switching;
+extern uint dmesg_log_syscall;
+extern uint dmesg_log_reg;
 
-#define DMESG_LOG(...) do { \
-    if (ticks_to_log >= ticks) \
+#define DMESG_LOG(TYPE, ...) do { \
+    if (dmesg_log_ ## TYPE) \
       pr_msg(__VA_ARGS__);\
 } while(0)
 

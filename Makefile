@@ -137,6 +137,7 @@ UPROGS=\
 	$U/_dmesg\
 	$U/_hwa\
 	$U/_hwb\
+	$U/_dmesg_flags\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

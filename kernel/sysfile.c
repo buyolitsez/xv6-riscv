@@ -517,6 +517,8 @@ sys_copy_user_dmesg(void)
 uint64
 sys_start_log_dmesg(void)
 {
-	addTicksToLog(10);
+  int flags;
+  argint(0, &flags);
+	check_dmesg_logging(flags);
 	return 0;
 }

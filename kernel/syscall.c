@@ -162,9 +162,9 @@ static char *syscallnames[] = {
 void log_syscall(int num, struct proc *p)
 {
   if (num > 0 && num < NELEM(syscallnames) && syscallnames[num])
-    DMESG_LOG("syscall(%s), pid = %d, pname = %s", syscallnames[num], p->pid, p->name);
+    DMESG_LOG(syscall, "syscall(%s), pid = %d, pname = %s", syscallnames[num], p->pid, p->name);
   else
-    DMESG_LOG("syscall(%d), pid = %d, pname = %s", num, p->pid, p->name);
+    DMESG_LOG(syscall, "syscall(%d), pid = %d, pname = %s", num, p->pid, p->name);
 }
 
 void

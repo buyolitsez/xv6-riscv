@@ -5,7 +5,6 @@
 
 int main(int argc, char* argv[])
 {
-  start_log_dmesg();
   int p[2];
   exitOnError(pipe(p), "Cannot create pipe!");
   int childPid = fork();
