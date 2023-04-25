@@ -23,6 +23,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 void copy_user_dmesg(char*);
+void start_log_dmesg(uint);
 
 // ulib.c
 int stat(const char*, struct stat*);

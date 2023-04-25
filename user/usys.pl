@@ -37,3 +37,4 @@ entry("sbrk");
 entry("sleep");
 entry("uptime");
 entry("copy_user_dmesg");
+entry("start_log_dmesg");

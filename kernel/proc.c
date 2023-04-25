@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "dmesg.h"
 
 struct cpu cpus[NCPU];
 
@@ -458,6 +459,8 @@ scheduler(void)
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
+		DMESG_LOG(switching, "context switch to %s, pid = %d, ra = %d, sp = %d, s0 = %d, s1 = %d, s2 = %d, s3 = %d, s4 = %d, s5 = %d, s6 = %d, s7 = %d, s8 = %d, s9 = %d, s10 = %d, s11 = %d", p->name, p->pid, p->context.ra, p->context.sp, p->context.s0, p->context.s1, p->context.s2, p->context.s3, p->context.s4, p->context.s5, p->context.s6, p->context.s7, p->context.s8, p->context.s9, p->context.s10, p->context.s11);
+
         p->state = RUNNING;
         c->proc = p;
         swtch(&c->context, &p->context);

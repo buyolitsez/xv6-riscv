@@ -126,3 +126,15 @@ void pr_copy(uint64 p) {
   if (code != 0)
     panic("dmesg: cannot copy to user space");
 }
+
+uint dmesg_log_interrupt = 0;
+uint dmesg_log_switching = 0;
+uint dmesg_log_syscall = 0;
+uint dmesg_log_reg = 1;
+
+void check_dmesg_logging(uint flag) {
+  dmesg_log_interrupt = (flag & 1);
+  dmesg_log_switching = (flag & 2);
+  dmesg_log_syscall = (flag & 4);
+}
+

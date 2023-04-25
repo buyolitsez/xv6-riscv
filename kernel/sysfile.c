@@ -513,3 +513,12 @@ sys_copy_user_dmesg(void)
   pr_copy(p);
   return 0;
 }
+
+uint64
+sys_start_log_dmesg(void)
+{
+  int flags;
+  argint(0, &flags);
+	check_dmesg_logging(flags);
+	return 0;
+}
