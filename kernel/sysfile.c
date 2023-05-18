@@ -364,10 +364,11 @@ sys_open(void)
     int cnt = 0;
     while (cnt < SLINK_FOLLOW && ip->type == T_SYMLINK) {
       read_link_once(ip, path);
+      ip = namei(path);
       ilock(ip);
-      count++;
+      cnt++;
     }
-    if (count == SLINK_FOLLOW) {
+    if (cnt == SLINK_FOLLOW) {
       iunlockput(ip);
       end_op();
       return -1;
