@@ -369,6 +369,17 @@ iunlockput(struct inode *ip)
   iput(ip);
 }
 
+static uint lookup_addr(struct inode *ip, uint* addr, struct buf *bp, uint is_log_write) {
+  if (*addr == 0) {
+    *addr = balloc(ip->dev);
+    if (*addr == 0)
+      panic("cannot allocate block");
+    if (is_log_write)
+      log_write(bp);
+  }
+  return *addr;
+}
+
 // Inode content
 //
 // The content (data) associated with each inode is stored
@@ -383,7 +394,7 @@ static uint
 bmap(struct inode *ip, uint bn)
 {
   uint addr, *a;
-  struct buf *bp;
+  struct buf *bp = 0;
 
   if(bn < NDIRECT){
     if((addr = ip->addrs[bn]) == 0){
@@ -417,6 +428,21 @@ bmap(struct inode *ip, uint bn)
     return addr;
   }
 
+  bn -= NINDIRECT;
+  if (bn < NDINDIRECT) {
+    addr = lookup_addr(ip, &ip->addrs[NDIRECT + 1], bp, 0);
+    bp = bread(ip->dev, addr);
+    a = (uint *)bp->data;
+    addr = lookup_addr(ip, &a[bn / NINDIRECT], bp, 1);
+    brelse(bp);
+
+    bp = bread(ip->dev, addr);
+    a = (uint *)bp->data;
+    addr = lookup_addr(ip, &a[bn % NINDIRECT], bp, 1);
+    brelse(bp);
+    return addr;
+  }
+
   panic("bmap: out of range");
 }
 
@@ -446,6 +472,27 @@ itrunc(struct inode *ip)
     brelse(bp);
     bfree(ip->dev, ip->addrs[NDIRECT]);
     ip->addrs[NDIRECT] = 0;
+  }
+
+  if (ip->addrs[NDIRECT + 1]) {
+    bp = bread(ip->dev, ip->addrs[NDIRECT + 1]);
+    a = (uint*)bp->data;
+    for (i = 0; i < NINDIRECT; i++) {
+      if (a[i] == 0)
+        continue;
+      struct buf *bpp = bread(ip->dev, a[i]);
+      uint* aa = (uint*)bpp->data;
+      for (j = 0; j < NDIRECT; j++) {
+        if (aa[j])
+          bfree(ip->dev, aa[j]);
+      }
+      brelse(bpp);
+      bfree(ip->dev, a[i]);
+      a[i] = 0;
+    }
+    brelse(bp);
+    bfree(ip->dev, ip->addrs[NDIRECT + 1]);
+    ip->addrs[NDIRECT + 1] = 0;
   }
 
   ip->size = 0;
